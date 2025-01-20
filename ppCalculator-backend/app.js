@@ -11,10 +11,10 @@ const logger = (req, res, next) => {
 
 app.use(logger);
 
-app.get("/api/search", (req, res) => {
+app.get("/api/search", async (req, res) => {
   const query = req.query.q;
   try {
-    const beatmaps = osuService.searchBeatmaps(query);
+    const beatmaps = await osuService.searchBeatmaps(query);
     res.json(beatmaps);
   } catch (error) {
     console.log(error);
