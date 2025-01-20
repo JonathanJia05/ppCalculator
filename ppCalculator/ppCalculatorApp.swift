@@ -15,3 +15,7 @@ struct ppCalculatorApp: App {
         }
     }
 }
+
+#Preview {
+    ContentView()
+}
