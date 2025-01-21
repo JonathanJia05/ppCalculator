@@ -1,0 +1,27 @@
+# Virtual Environment
+venv/
+
+# Python Cache Files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environment Variables
+.env
+
+# IDE/Editor Settings
+.vscode/
+*.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Logs
+*.log
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Others
+coverage/
