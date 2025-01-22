@@ -10,17 +10,13 @@ ppCalculator is an iOS application designed to help Osu! players accurately calc
 
 ## How It Works
 
-1. **Search for Beatmaps**
-   - Search for your desired beatmap from the Osu! database.
+1. Search for your desired beatmap from the Osu! database.
    
-2. **Select and Input**
-   - Choose a beatmap, input your selected mods, accuracy percentage, and combo.
+2. Choose a beatmap, input your selected mods, accuracy percentage, and combo.
    
-3. **Calculate PP**
-   - The app sends a POST request to the backend, which processes the data and returns an accurate PP calculation based on your inputs.
+3. The app sends a POST request to the backend, which processes the data and returns an accurate PP calculation based on your inputs.
 
-4. **Farming time**
-   - Use the calculated PP to farm or set new goals.
+4. Use the calculated PP to farm or set new goals.
 
 ## Tech Stack
 
