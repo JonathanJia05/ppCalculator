@@ -60,5 +60,5 @@ ppCalculator is an iOS application designed to help Osu! players accurately calc
 
 ## Acknowledgements
 
-- **[rosu-pp-py](https://github.com/RosuAPI/rosu-pp-py):** For providing the powerful library used in PP calculations.
-- **[Osu! API v2](https://osu.ppy.sh/docs/index.html):** For enabling comprehensive beatmap search and data access.
+- **[rosu-pp-py](https://github.com/RosuAPI/rosu-pp-py):** For PP calculations.
+- **[Osu! API v2](https://osu.ppy.sh/docs/index.html):** For beatmap search and data access.
