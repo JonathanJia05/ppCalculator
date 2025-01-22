@@ -1,7 +1,18 @@
 from fastapi import FastAPI
 from app.services.search import searchMaps
+from app.services.calculation import calculatepp
+from pydantic import BaseModel
+from typing import List, Optional
 
 app = FastAPI()
+
+
+class PPRequest(BaseModel):
+    beatmap_id: int
+    accuracy: float
+    misses: int = 0
+    combo: Optional[int] = None
+    mods: int = 0
 
 
 @app.get("/search")
@@ -14,9 +25,16 @@ async def search(query: str, pages: int):
 
 
 @app.post("/calculate")
-async def calculate(id: int):
+async def post_calculate_pp(data: PPRequest):
     try:
-        results = await calculatepp()
-        return results
+        print(f"Received data: {data}")
+        result = calculatepp(
+            beatmap_id=data.beatmap_id,
+            accuracy=data.accuracy,
+            misses=data.misses,
+            combo=data.combo,
+            mods=data.mods,
+        )
+        return result
     except Exception as error:
         return {"error": str(error)}
