@@ -52,7 +52,7 @@ ppCalculator is an iOS application designed to help Osu! players accurately calc
    
 4. **Run Backend Server**
    ```bash
-   uvicorn main:app --reload
+   uvicorn app.main:app --reload
    ```
    
 5. **Open the iOS App**
