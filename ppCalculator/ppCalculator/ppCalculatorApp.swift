@@ -9,10 +9,10 @@ import SwiftUI
 
 @main
 struct ppCalculatorApp: App {
-    @StateObject private var api = apiRequests()
+    @StateObject private var api = ApiRequests()
     var body: some Scene {
         WindowGroup {
-            searchView()
+            SearchView()
                 .environmentObject(api)
         }
     }
