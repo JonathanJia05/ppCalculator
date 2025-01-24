@@ -1,0 +1,58 @@
+//
+//  mapRowView.swift
+//  ppCalculator
+//
+//  Created by Jonathan Jia on 1/23/25.
+//
+
+import SwiftUI
+
+struct mapRowView: View {
+    var map: Map
+
+    var body: some View {
+        HStack {
+            AsyncImage(url: URL(string: map.map_image)) { phase in
+                if let image = phase.image {
+                    image.resizable()
+                        .frame(width: 130, height: 70)
+                        .cornerRadius(8)
+                        .padding(8)
+                } else {
+                    Image(systemName: "exclamationmark.triangle")
+                        .resizable()
+                        .frame(width: 50, height: 50)
+                        .foregroundColor(.red)
+                        .padding(8)
+                }
+            }
+
+            VStack(alignment: .leading) {
+                Text(map.title)
+                    .font(.headline)
+                    .foregroundColor(.white)
+                Text(map.mapper)
+                    .font(.subheadline)
+                    .foregroundColor(.white)
+                Text("Stars: \(String(format: "%.2f", map.star_rating)) ⭐")
+                    .font(.caption)
+                    .foregroundColor(.white)
+            }
+            .frame(height: 80)
+            Spacer()
+        }
+        .background(Color(red: 57/255, green: 66/255, blue: 70/255))
+        .cornerRadius(8)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 3)
+    }
+}
+
+struct mapRowView_Previews: PreviewProvider {
+    static var previews: some View {
+        // Using the first mock map
+        mapRowView(map: MockMapData.maps[1])
+            .previewLayout(.sizeThatFits)
+            
+    }
+}
