@@ -10,12 +10,6 @@ import SwiftUI
 
 
 struct searchView: View {
-//    init() {
-//        UISearchBar.appearance().searchTextField.textColor = .white
-//        let appearance = UINavigationBarAppearance()
-//        appearance.largeTitleTextAttributes = [.foregroundColor: UIColor.white]
-//        UINavigationBar.appearance().standardAppearance = appearance
-//    }
 
     @State private var searchQuery: String = ""
 
