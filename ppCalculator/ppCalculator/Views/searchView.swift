@@ -1,11 +1,10 @@
 //
-//  searchView.swift
+//  SearchView.swift
 //  ppCalculator
 //
 //  Created by Jonathan Jia on 1/23/25.
 //
 
-import Foundation
 import SwiftUI
 
 struct SearchView: View {
@@ -16,8 +15,7 @@ struct SearchView: View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 0) {
-                    ForEach(api.data, id: \.map_id) { map in
-                        mapRowView(map: map)
+                    ForEach(api.data, id: \.map_id) { map in mapRowView(map: map)
                     }
                 }
             }
@@ -26,26 +24,30 @@ struct SearchView: View {
             .toolbarBackground(.visible, for: .navigationBar)
             .navigationTitle("Search for a map")
             .searchable(text: $query)
+
             .onSubmit(of: .search) {
                 guard !query.isEmpty else {
-                    api.data = []
+                    api.data.removeAll()
                     return
                 }
-                let baseURL = "http://127.0.0.1:8000/search"
-                let queryString = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-                let urlString = "\(baseURL)?query=\(queryString.lowercased())&pages=1"
                 
-                if let url = URL(string: urlString) {
-                    api.getMaps(from: url)
-                } else {
-                    print("Invalid URL")
+                let baseURL = "http://127.0.0.1:8000/search"
+                let encodedQuery = query
+                    .lowercased()
+                    .addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+                let urlString = "\(baseURL)?query=\(encodedQuery)&pages=1"
+                
+                guard let url = URL(string: urlString) else {
+                    print("Invalid URL: \(urlString)")
+                    return
                 }
+                
+                api.getMaps(from: url)
             }
         }
         .environment(\.colorScheme, .dark)
     }
 }
-
 
 struct SearchView_Previews: PreviewProvider {
     static var previews: some View {

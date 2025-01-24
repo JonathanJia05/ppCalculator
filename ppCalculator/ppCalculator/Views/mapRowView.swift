@@ -19,11 +19,7 @@ struct mapRowView: View {
                         .cornerRadius(8)
                         .padding(8)
                 } else {
-                    Image(systemName: "exclamationmark.triangle")
-                        .resizable()
-                        .frame(width: 50, height: 50)
-                        .foregroundColor(.red)
-                        .padding(8)
+                    ProgressView()
                 }
             }
 
