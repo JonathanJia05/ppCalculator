@@ -5,6 +5,8 @@
 //  Created by Jonathan Jia on 1/23/25.
 //
 
+//some map data for testing purposes
+
 import Foundation
 struct MockMapData {
     static let maps: [Map] = [

@@ -47,11 +47,10 @@ struct mapRowView: View {
     }
 }
 
-struct mapRowView_Previews: PreviewProvider {
-    static var previews: some View {
-        // Using the first mock map
-        mapRowView(map: MockMapData.maps[1])
-            .previewLayout(.sizeThatFits)
-            
-    }
-}
+//struct mapRowView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        mapRowView(map: MockMapData.maps[1])
+//            .previewLayout(.sizeThatFits)
+//            
+//    }
+//}
