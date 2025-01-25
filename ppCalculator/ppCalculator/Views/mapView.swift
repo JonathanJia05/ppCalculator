@@ -6,3 +6,14 @@
 //
 
 import Foundation
+import SwiftUI
+
+struct MapView: View {
+    let map: Map
+    
+    var body: some View {
+        VStack{
+            Text("in da map")
+        }
+    }
+}
