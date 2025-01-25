@@ -54,7 +54,7 @@ ppCalculator is an iOS application designed to help Osu! players accurately calc
    ```
    
 5. **Open the iOS App**
-   - Open the project in Xcode and run it on your simulator or device.
+   - Open the project in Xcode and run it in simulator.
 
 ## Acknowledgements
 
