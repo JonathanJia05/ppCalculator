@@ -20,7 +20,7 @@ ppCalculator is an iOS application designed to help Osu! players accurately calc
 
 - **Frontend:** Swift with SwiftUI
 - **Backend:** Python with FastAPI
-- **Libraries:**
+- **Libraries and APIs:**
   - [rosu-pp-py](https://github.com/MaxOhn/rosu-pp-py) for PP calculations
   - [Osu! API v2](https://osu.ppy.sh/docs/index.html) for beatmap search and data retrieval
 
