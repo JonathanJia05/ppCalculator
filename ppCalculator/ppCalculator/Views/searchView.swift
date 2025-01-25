@@ -15,7 +15,11 @@ struct SearchView: View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 0) {
-                    ForEach(api.data, id: \.map_id) { map in mapRowView(map: map)
+                    ForEach(api.data, id: \.map_id) { map in
+                        NavigationLink(destination: MapView(map: map)){
+                            mapRowView(map: map)
+                        }
+                        .buttonStyle(PlainButtonStyle())
                     }
                 }
             }
