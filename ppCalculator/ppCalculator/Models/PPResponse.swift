@@ -6,3 +6,8 @@
 //
 
 import Foundation
+import SwiftUI
+
+struct PPResponse: Codable {
+    var pp: Double
+}
