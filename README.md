@@ -49,19 +49,22 @@ ppCalculator is an iOS application designed to help Osu! players accurately calc
    ```
 
 3. **Start venv**
+   Mac/Linux?
    ```bash
    source venv/bin/activate
    ```
+   Windows:
    ```bash
    .\venv\Scripts\activate
    ```
    
-4. **Install Dependencies**
+5. **Install Dependencies**
    ```bash
    pip install -r requirements.txt
    ```
    
-5. **Create .env file**
+6. **Create .env file**
+   Create a .env file in the backend directory. Put this in the file:
    ```bash
    CLIENT_ID: your client ID
    CLIENT_SECRET: your client secret
