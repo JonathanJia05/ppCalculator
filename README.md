@@ -38,22 +38,41 @@ ppCalculator is an iOS application designed to help Osu! players accurately calc
    git clone https://github.com/yourusername/osu-pp-calculator.git
    ```
    
-2. **Navigate to Backend**
+2. **Go to backend**
    ```bash
-   cd osu-pp-calculator/backend
+   CD backend
    ```
    
-3. **Install Dependencies**
+2. **Create venv**
+   ```bash
+   python3 -m venv venv
+   ```
+
+3. **Start venv**
+   ```bash
+   source venv/bin/activate
+   ```
+   ```bash
+   .\venv\Scripts\activate
+   ```
+   
+4. **Install Dependencies**
    ```bash
    pip install -r requirements.txt
    ```
    
-4. **Run Backend Server**
+5. **Create .env file**
+   ```bash
+   CLIENT_ID: your client ID
+   CLIENT_SECRET: your client secret
+   ```
+   
+7. **Run Backend Server**
    ```bash
    uvicorn app.main:app --reload
    ```
    
-5. **Open the iOS App**
+8. **Open the iOS App**
    - Open the project in Xcode and run it in simulator.
 
 ## Acknowledgements
