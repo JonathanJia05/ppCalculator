@@ -11,32 +11,36 @@ import SwiftUI
 struct MapView: View {
     let map: Map
     
-    @State private var accuracy: Double = 1.0
-    @State private var misses: Int? = 0
+    @State private var accuracy: Double? = nil
+    @State private var misses: Int? = nil
     @State private var combo: Int? = nil
-    @State private var mods: Int = 0
+    @State private var activeMods: Set<String> = []
+    @State private var modsString: String = ""
     @StateObject private var api = ApiRequests()
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             
-            AsyncImage(url: URL(string: map.map_image)) { phase in
-                if let image = phase.image {
-                    image
-                        .resizable()
-                        .frame(width: 380, height: 140)
-                        .cornerRadius(8)
-                        .padding()
-                } else {
-                    ProgressView()
+            HStack{
+                AsyncImage(url: URL(string: map.map_image)) { phase in
+                    if let image = phase.image {
+                        image
+                            .resizable()
+                            .frame(width: 360, height: 140)
+                            .cornerRadius(8)
+                    } else {
+                        ProgressView()
+                    }
                 }
             }
-            .padding(.top, 16)
+            .frame(maxWidth: .infinity)
+            .padding(.top, 8)
             
             VStack{
                 HStack {
                     Text("Accuracy: ")
-                    TextField("Accuracy", value: $accuracy, format: .percent)
+                        .frame(width: 100, alignment: .leading)
+                    TextField("100%", value: $accuracy, format: .percent)
                         .keyboardType(.decimalPad)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .frame(width: 100)
@@ -44,7 +48,8 @@ struct MapView: View {
                 
                 HStack {
                     Text("Misses: ")
-                    TextField("Misses", value: $misses, format: .number)
+                        .frame(width: 100, alignment: .leading)
+                    TextField("0", value: $misses, format: .number)
                         .keyboardType(.numberPad)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .frame(width: 100)
@@ -52,36 +57,33 @@ struct MapView: View {
                 
                 HStack {
                     Text("Combo: ")
-                    TextField("Combo", value: $combo, format: .number)
+                        .frame(width: 100, alignment: .leading)
+                    TextField("Max", value: $combo, format: .number)
                         .keyboardType(.numberPad)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .frame(width: 100)
                 }
                 
                 HStack {
-                    Text("Mods: ")
-                    TextField("Mods", value: $mods, format: .number)
-                        .keyboardType(.numberPad)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .frame(width: 100)
+                    ToggleButton(mod: "dt", label: "DT", activeMods: $activeMods, modsString: $modsString)
+                    ToggleButton(mod: "hr", label: "HR", activeMods: $activeMods, modsString: $modsString)
+                    ToggleButton(mod: "hd", label: "HD", activeMods: $activeMods, modsString: $modsString)
                 }
+                .frame(maxWidth: .infinity, alignment: .center)
+                .padding(.top, 10)
+
+
             }
             .padding()
             
             VStack{
                 Button(action: {
-                    guard let missVal = misses,
-                          let comboVal = combo else {
-                        print("Field empty")
-                        return
-                    }
-                    
                     let ppRequest = PPRequest(
                         beatmap_id: map.map_id,
-                        accuracy: accuracy * 100,
-                        misses: missVal,
-                        combo: comboVal,
-                        mods: mods
+                        accuracy: (accuracy ?? 1.0) * 100,
+                        misses: misses ?? 0,
+                        combo: combo ?? 0,
+                        mods: modsString
                     )
                     api.getPP(with: ppRequest)
                 }) {
@@ -92,8 +94,8 @@ struct MapView: View {
                 }
                 
                 if let pp = api.pp {
-                    Text("Calculated PP: \(pp)")
-                        .font(.headline)
+                    Text("\(String(format: "%.2f", pp))pp")
+                        .font(.title)
                         .padding(.top, 8)
                 } else {
                     Text("Enter data then press Calculate!")
@@ -109,5 +111,35 @@ struct MapView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(Color(red: 34/255, green: 40/255, blue: 42/255))
+    }
+}
+
+struct ToggleButton: View {
+    let mod: String
+    let label: String
+    @Binding var activeMods: Set<String>
+    @Binding var modsString: String
+    
+    var body: some View {
+        Button(action: {
+            toggleMod()
+        }) {
+            Text(label)
+                .frame(width: 80, height: 50)
+                .background(activeMods.contains(mod) ? Color(red: 255/255, green: 143/255, blue: 171/255) : Color.gray)
+                .foregroundColor(.white)
+                .cornerRadius(10)
+                .animation(.easeInOut(duration: 0.1), value: activeMods)
+        }
+    }
+    
+    private func toggleMod(){
+        if activeMods.contains(mod) {
+            activeMods.remove(mod)
+        } else {
+            activeMods.insert(mod)
+        }
+        
+        modsString = activeMods.sorted().joined()
     }
 }
