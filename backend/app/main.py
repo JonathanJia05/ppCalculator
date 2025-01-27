@@ -12,7 +12,7 @@ class PPRequest(BaseModel):
     accuracy: float
     misses: int = 0
     combo: Optional[int] = None
-    mods: int = 0
+    mods: str = ""
 
 
 @app.get("/search")
