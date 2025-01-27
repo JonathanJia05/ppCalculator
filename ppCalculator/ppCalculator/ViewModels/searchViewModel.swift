@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 class SearchViewModel: ObservableObject {
     private let api = ApiRequests()

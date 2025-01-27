@@ -9,20 +9,18 @@ import Foundation
 import SwiftUI
 
 struct MapView: View {
-    let map: Map
     
-    @State private var accuracy: Double? = nil
-    @State private var misses: Int? = nil
-    @State private var combo: Int? = nil
-    @State private var activeMods: Set<String> = []
-    @State private var modsString: String = ""
-    @StateObject private var api = ApiRequests()
+    @StateObject private var viewModel: PPViewModel
+    
+    init(map: Map) {
+        _viewModel = StateObject(wrappedValue: PPViewModel(map: map))
+    }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             
             HStack{
-                AsyncImage(url: URL(string: map.map_image)) { phase in
+                AsyncImage(url: viewModel.mapImageURL) { phase in
                     if let image = phase.image {
                         image
                             .resizable()
@@ -40,7 +38,7 @@ struct MapView: View {
                 HStack {
                     Text("Accuracy: ")
                         .frame(width: 100, alignment: .leading)
-                    TextField("100%", value: $accuracy, format: .percent)
+                    TextField("100%", value: $viewModel.accuracy, format: .percent)
                         .keyboardType(.decimalPad)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .frame(width: 100)
@@ -49,7 +47,7 @@ struct MapView: View {
                 HStack {
                     Text("Misses: ")
                         .frame(width: 100, alignment: .leading)
-                    TextField("0", value: $misses, format: .number)
+                    TextField("0", value: $viewModel.misses, format: .number)
                         .keyboardType(.numberPad)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .frame(width: 100)
@@ -58,34 +56,26 @@ struct MapView: View {
                 HStack {
                     Text("Combo: ")
                         .frame(width: 100, alignment: .leading)
-                    TextField("Max", value: $combo, format: .number)
+                    TextField("Max", value: $viewModel.combo, format: .number)
                         .keyboardType(.numberPad)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .frame(width: 100)
                 }
                 
                 HStack {
-                    ToggleButton(mod: "dt", label: "DT", activeMods: $activeMods, modsString: $modsString)
-                    ToggleButton(mod: "hr", label: "HR", activeMods: $activeMods, modsString: $modsString)
-                    ToggleButton(mod: "hd", label: "HD", activeMods: $activeMods, modsString: $modsString)
+                    ToggleButton(mod: "dt", label: "DT", viewModel: viewModel)
+                    ToggleButton(mod: "hr", label: "HR", viewModel: viewModel)
+                    ToggleButton(mod: "hd", label: "HD", viewModel: viewModel)
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
                 .padding(.top, 10)
-
-
+                
             }
             .padding()
             
             VStack{
                 Button(action: {
-                    let ppRequest = PPRequest(
-                        beatmap_id: map.map_id,
-                        accuracy: (accuracy ?? 1.0) * 100,
-                        misses: misses ?? 0,
-                        combo: combo ?? 0,
-                        mods: modsString
-                    )
-                    api.getPP(with: ppRequest)
+                    viewModel.calculatePP()
                 }) {
                     Text("Calculate")
                         .padding(8)
@@ -93,7 +83,7 @@ struct MapView: View {
                         .cornerRadius(8)
                 }
                 
-                if let pp = api.pp {
+                if let pp = viewModel.pp {
                     Text("\(String(format: "%.2f", pp))pp")
                         .font(.title)
                         .padding(.top, 8)
@@ -105,41 +95,29 @@ struct MapView: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: 100, alignment: .center)
-            
-            
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(Color(red: 34/255, green: 40/255, blue: 42/255))
     }
-}
-
-struct ToggleButton: View {
-    let mod: String
-    let label: String
-    @Binding var activeMods: Set<String>
-    @Binding var modsString: String
     
-    var body: some View {
-        Button(action: {
-            toggleMod()
-        }) {
-            Text(label)
-                .frame(width: 80, height: 50)
-                .background(activeMods.contains(mod) ? Color(red: 255/255, green: 143/255, blue: 171/255) : Color.gray)
-                .foregroundColor(.white)
-                .cornerRadius(10)
-                .animation(.easeInOut(duration: 0.1), value: activeMods)
-        }
-    }
-    
-    private func toggleMod(){
-        if activeMods.contains(mod) {
-            activeMods.remove(mod)
-        } else {
-            activeMods.insert(mod)
-        }
+    struct ToggleButton: View {
+        let mod: String
+        let label: String
+        @ObservedObject var viewModel: PPViewModel
         
-        modsString = activeMods.sorted().joined()
+        var body: some View {
+            Button(action: {
+                viewModel.toggleMod(mod: mod)
+            }) {
+                Text(label)
+                    .frame(width: 80, height: 50)
+                    .background(viewModel.activeMods.contains(mod) ? Color(red: 255/255, green: 143/255, blue: 171/255) : Color.gray)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+                    .animation(.easeInOut(duration: 0.1), value: viewModel.activeMods)
+            }
+        }
     }
+
 }
