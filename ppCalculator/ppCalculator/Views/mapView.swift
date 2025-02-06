@@ -9,34 +9,36 @@ import Foundation
 import SwiftUI
 
 struct MapView: View {
-    let map: Map
     
-    @State private var accuracy: Double = 1.0
-    @State private var misses: Int? = 0
-    @State private var combo: Int? = nil
-    @State private var mods: Int = 0
-    @StateObject private var api = ApiRequests()
+    @StateObject private var viewModel: PPViewModel
+    
+    init(map: Map) {
+        _viewModel = StateObject(wrappedValue: PPViewModel(map: map))
+    }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             
-            AsyncImage(url: URL(string: map.map_image)) { phase in
-                if let image = phase.image {
-                    image
-                        .resizable()
-                        .frame(width: 380, height: 140)
-                        .cornerRadius(8)
-                        .padding()
-                } else {
-                    ProgressView()
+            HStack{
+                AsyncImage(url: viewModel.mapImageURL) { phase in
+                    if let image = phase.image {
+                        image
+                            .resizable()
+                            .frame(width: 360, height: 140)
+                            .cornerRadius(8)
+                    } else {
+                        ProgressView()
+                    }
                 }
             }
-            .padding(.top, 16)
+            .frame(maxWidth: .infinity)
+            .padding(.top, 8)
             
             VStack{
                 HStack {
                     Text("Accuracy: ")
-                    TextField("Accuracy", value: $accuracy, format: .percent)
+                        .frame(width: 100, alignment: .leading)
+                    TextField("100%", value: $viewModel.accuracy, format: .percent)
                         .keyboardType(.decimalPad)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .frame(width: 100)
@@ -44,7 +46,8 @@ struct MapView: View {
                 
                 HStack {
                     Text("Misses: ")
-                    TextField("Misses", value: $misses, format: .number)
+                        .frame(width: 100, alignment: .leading)
+                    TextField("0", value: $viewModel.misses, format: .number)
                         .keyboardType(.numberPad)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .frame(width: 100)
@@ -52,38 +55,27 @@ struct MapView: View {
                 
                 HStack {
                     Text("Combo: ")
-                    TextField("Combo", value: $combo, format: .number)
+                        .frame(width: 100, alignment: .leading)
+                    TextField("Max", value: $viewModel.combo, format: .number)
                         .keyboardType(.numberPad)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .frame(width: 100)
                 }
                 
                 HStack {
-                    Text("Mods: ")
-                    TextField("Mods", value: $mods, format: .number)
-                        .keyboardType(.numberPad)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .frame(width: 100)
+                    ToggleButton(mod: "dt", label: "DT", viewModel: viewModel)
+                    ToggleButton(mod: "hr", label: "HR", viewModel: viewModel)
+                    ToggleButton(mod: "hd", label: "HD", viewModel: viewModel)
                 }
+                .frame(maxWidth: .infinity, alignment: .center)
+                .padding(.top, 10)
+                
             }
             .padding()
             
             VStack{
                 Button(action: {
-                    guard let missVal = misses,
-                          let comboVal = combo else {
-                        print("Field empty")
-                        return
-                    }
-                    
-                    let ppRequest = PPRequest(
-                        beatmap_id: map.map_id,
-                        accuracy: accuracy * 100,
-                        misses: missVal,
-                        combo: comboVal,
-                        mods: mods
-                    )
-                    api.getPP(with: ppRequest)
+                    viewModel.calculatePP()
                 }) {
                     Text("Calculate")
                         .padding(8)
@@ -91,9 +83,9 @@ struct MapView: View {
                         .cornerRadius(8)
                 }
                 
-                if let pp = api.pp {
-                    Text("Calculated PP: \(pp)")
-                        .font(.headline)
+                if let pp = viewModel.pp {
+                    Text("\(String(format: "%.2f", pp))pp")
+                        .font(.title)
                         .padding(.top, 8)
                 } else {
                     Text("Enter data then press Calculate!")
@@ -103,11 +95,29 @@ struct MapView: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: 100, alignment: .center)
-            
-            
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(Color(red: 34/255, green: 40/255, blue: 42/255))
     }
+    
+    struct ToggleButton: View {
+        let mod: String
+        let label: String
+        @ObservedObject var viewModel: PPViewModel
+        
+        var body: some View {
+            Button(action: {
+                viewModel.toggleMod(mod: mod)
+            }) {
+                Text(label)
+                    .frame(width: 80, height: 50)
+                    .background(viewModel.activeMods.contains(mod) ? Color(red: 255/255, green: 143/255, blue: 171/255) : Color.gray)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+                    .animation(.easeInOut(duration: 0.1), value: viewModel.activeMods)
+            }
+        }
+    }
+
 }

@@ -13,5 +13,5 @@ struct PPRequest: Hashable, Codable {
     var accuracy: Double
     var misses: Int
     var combo: Int
-    var mods: Int
+    var mods: String
 }
