@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from app.services.search import searchMaps
 from app.services.calculation import calculatepp
 from app.services.dbSearch import searchDB
+from app.services.mapSearch import getBeatmapDetails
 from pydantic import BaseModel
 from typing import List, Optional
 
@@ -46,5 +47,14 @@ def search(query: str, page: int = 1):
     try:
         results = searchDB(query, page)
         return results
+    except Exception as error:
+        return {"error": str(error)}
+
+
+@app.get("/beatmap")
+async def beatmap_endpoint(map_id: int):
+    try:
+        result = await getBeatmapDetails(map_id)
+        return result
     except Exception as error:
         return {"error": str(error)}
