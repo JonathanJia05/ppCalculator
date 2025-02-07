@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from app.services.search import searchMaps
 from app.services.calculation import calculatepp
+from app.services.dbSearch import searchDB
 from pydantic import BaseModel
 from typing import List, Optional
 
@@ -36,5 +37,14 @@ async def post_calculate_pp(data: PPRequest):
             mods=data.mods,
         )
         return result
+    except Exception as error:
+        return {"error": str(error)}
+
+
+@app.get("/searchdb")
+def search(query: str):
+    try:
+        results = searchDB(query)
+        return results
     except Exception as error:
         return {"error": str(error)}
