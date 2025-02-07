@@ -42,9 +42,9 @@ async def post_calculate_pp(data: PPRequest):
 
 
 @app.get("/searchdb")
-def search(query: str):
+def search(query: str, page: int = 1):
     try:
-        results = searchDB(query)
+        results = searchDB(query, page)
         return results
     except Exception as error:
         return {"error": str(error)}
