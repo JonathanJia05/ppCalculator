@@ -6,6 +6,8 @@
 
 ppCalculator is an iOS application designed to help Osu! players accurately calculate performance point (pp) scores on maps for their personal goals.
 
+NOTE: I have migrated the backend to use [osuDB](https://github.com/JonathanJia05/osuDB) for more accurate and flexible search results.
+
 ## How It Works
 
 1. Search for your desired beatmap from the Osu! database.
