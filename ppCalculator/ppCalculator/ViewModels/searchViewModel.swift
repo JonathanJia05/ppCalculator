@@ -23,7 +23,7 @@ class SearchViewModel: ObservableObject {
         let encodedQuery = query
             .lowercased()
             .addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-        let urlString = "\(baseURL)?query=\(encodedQuery)"
+        let urlString = "\(baseURL)?query=\(encodedQuery)&page=1"
         
         guard let url = URL(string: urlString) else {
             print("Invalid URL: \(urlString)")
