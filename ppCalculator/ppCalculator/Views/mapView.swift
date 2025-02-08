@@ -35,6 +35,27 @@ struct MapView: View {
             .frame(maxWidth: .infinity)
             .padding(.top, 8)
             
+            HStack {
+                VStack(alignment: .leading) {
+                    Text(map.title)
+                        .font(.headline)
+                        .foregroundColor(.white)
+                    Text(map.version)
+                        .font(.subheadline)
+                        .foregroundColor(.white)
+                    Text(map.mapper)
+                        .font(.caption)
+                        .foregroundColor(.white)
+                    Text("\(String(format: "%.2f", map.star_rating)) ⭐")
+                        .font(.caption)
+                        .foregroundColor(.white)
+                }
+                .frame(height: 80)
+                Spacer()
+            }
+            .padding(.horizontal, 22)
+            .padding(.vertical, 3)
+            
             VStack{
                 HStack {
                     Text("Accuracy: ")
