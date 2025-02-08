@@ -4,8 +4,8 @@ from fastapi import HTTPException
 from dotenv import load_dotenv
 
 load_dotenv(override=True)
-print(os.getenv("CLIENT_ID"))
-print(os.getenv("CLIENT_SECRET"))
+# print(os.getenv("CLIENT_ID"))
+# print(os.getenv("CLIENT_SECRET"))
 
 OSU_BASE_URL = "https://osu.ppy.sh/api/v2"
 OSU_AUTH_URL = "https://osu.ppy.sh/oauth/token"

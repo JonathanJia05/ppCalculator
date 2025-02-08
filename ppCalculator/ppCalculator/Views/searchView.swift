@@ -31,8 +31,12 @@ struct SearchView: View {
             .onSubmit(of: .search) {
                 viewModel.search()
             }
+            .onAppear{
+                viewModel.search()
+            }
         }
         .environment(\.colorScheme, .dark)
+        .background(Color(red: 34/255, green: 40/255, blue: 42/255))
     }
 }
 

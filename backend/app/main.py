@@ -43,12 +43,12 @@ async def post_calculate_pp(data: PPRequest):
 
 
 @app.get("/searchdb")
-def search(query: str, page: int = 1):
-    try:
+def search(query: str = "", page: int = 1):
+    if query.strip() == "":
+        results = searchDB("", page)
+    else:
         results = searchDB(query, page)
-        return results
-    except Exception as error:
-        return {"error": str(error)}
+    return results
 
 
 @app.get("/beatmap")
