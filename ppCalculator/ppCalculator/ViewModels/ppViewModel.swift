@@ -27,7 +27,7 @@ class PPViewModel: ObservableObject{
             beatmap_id: map.map_id,
             accuracy: (accuracy ?? 1.0) * 100,
             misses: misses ?? 0,
-            combo: combo ?? 0,
+            combo: combo ?? map.max_combo,
             mods: modsString
         )
         api.getPP(with: ppRequest) {
