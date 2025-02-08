@@ -14,11 +14,6 @@ class SearchViewModel: ObservableObject {
     @Published var maps: [Map] = []
     
     func search() {
-        guard !query.isEmpty else {
-            api.data.removeAll()
-            return
-        }
-        
         let baseURL = "http://127.0.0.1:8000/searchdb"
         let encodedQuery = query
             .lowercased()
@@ -29,7 +24,6 @@ class SearchViewModel: ObservableObject {
             print("Invalid URL: \(urlString)")
             return
         }
-        
         api.getMaps(from: url) {
             DispatchQueue.main.async{
                 self.maps = self.api.data
