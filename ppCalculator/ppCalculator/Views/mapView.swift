@@ -11,8 +11,9 @@ import SwiftUI
 struct MapView: View {
     
     @StateObject private var viewModel: PPViewModel
-    
+    private let map: Map
     init(map: Map) {
+        self.map = map
         _viewModel = StateObject(wrappedValue: PPViewModel(map: map))
     }
     
@@ -56,7 +57,7 @@ struct MapView: View {
                 HStack {
                     Text("Combo: ")
                         .frame(width: 100, alignment: .leading)
-                    TextField("Max", value: $viewModel.combo, format: .number)
+                    TextField("\(map.max_combo)", value: $viewModel.combo, format: .number)
                         .keyboardType(.numberPad)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .frame(width: 100)

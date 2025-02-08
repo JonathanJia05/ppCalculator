@@ -33,7 +33,8 @@ async def authenticate():
     except httpx.HTTPStatusError as error:
         print(f"Auth with osu! API failed: {error}")
         raise HTTPException(
-            status_code=500, detail="Authentication with osu! API failed"
+            status_code=500,
+            detail=f"Authentication with osu! API failed{CLIENT_ID} {CLIENT_SECRET}",
         )
 
 

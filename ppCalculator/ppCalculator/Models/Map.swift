@@ -15,4 +15,8 @@ struct Map: Hashable, Codable {
     var star_rating: Double
     var map_id: Int
     var map_image: String
+    var artist: String
+    var max_combo: Int
+    var plays: Int
 }
+
