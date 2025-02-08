@@ -4,19 +4,22 @@ from app.database.config import load_config
 
 
 def searchDB(query: str, page: int = 1):
-    pageSize = 50
+    pageSize = 100
     offset = (page - 1) * pageSize
     sql = """
         SELECT 
             title, 
             difficulty AS version, 
-            artist AS mapper, 
+            artist AS artist, 
             stars AS star_rating, 
             mapid AS map_id, 
-            imgurl AS map_image
+            imgurl AS map_image,
+            max_combo AS max_combo,
+            mapper AS mapper,
+            playcount AS plays
         FROM beatmaps
         WHERE search_vector @@ plainto_tsquery('english', %s)
-        ORDER BY mapid
+        ORDER BY playcount DESC
         LIMIT %s OFFSET %s
     """
     results = []

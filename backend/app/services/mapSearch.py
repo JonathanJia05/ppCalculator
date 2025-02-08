@@ -39,6 +39,7 @@ async def authenticate():
 
 
 async def getBeatmapDetails(map_id: int):
+    results = []
     global accessToken
     if not accessToken:
         await authenticate()
@@ -48,7 +49,13 @@ async def getBeatmapDetails(map_id: int):
             url = f"{OSU_BASE_URL}/beatmaps/{map_id}"
             response = await client.get(url, headers=headers)
             response.raise_for_status()
-            return response.json()
+            data = response.json()
+            info = {
+                "playcount": data["playcount"],
+                "maxCombo": data["max_combo"],
+                "creator": data["beatmapset"]["creator"],
+            }
+            return info
     except httpx.HTTPStatusError as error:
         print(f"Error fetching beatmap details: {error}")
         raise
