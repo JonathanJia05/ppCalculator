@@ -14,14 +14,18 @@ struct mapRowView: View {
         HStack {
             AsyncImage(url: URL(string: map.map_image)) { phase in
                 if let image = phase.image {
-                    image.resizable()
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
                         .frame(width: 130, height: 70)
+                        .clipped()
                         .cornerRadius(8)
                         .padding(8)
                 } else {
                     ProgressView()
                 }
             }
+
 
             VStack(alignment: .leading) {
                 Text(map.title)
