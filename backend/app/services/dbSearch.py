@@ -4,7 +4,7 @@ from app.database.config import load_config
 
 
 def searchDB(mode: int, query: str, page: int = 1):
-    pageSize = 50
+    pageSize = 25
     offset = (page - 1) * pageSize
 
     if query.strip() == "":

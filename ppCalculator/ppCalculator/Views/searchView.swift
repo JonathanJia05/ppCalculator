@@ -54,14 +54,31 @@ struct SearchView: View {
                 viewModel.search()
             }
             .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    HStack{
+                        Button(action: {
+                            viewModel.search()
+                        }) {
+                            Image(systemName: "house.fill")
+                                .foregroundColor(.white)
+                        }
+                        
+                        Button(action: {
+                            viewModel.search()
+                        }) {
+                            Image(systemName: "bubble.left.fill")
+                                .foregroundColor(.white)
+                        }
+                    }
+                }
                 ToolbarItemGroup(placement: .bottomBar) {
                     HStack{
-                        ToggleButton(mode: 0, label: "Osu!", viewModel: viewModel)
-                        ToggleButton(mode: 1, label: "Taiko", viewModel: viewModel)
-                        ToggleButton(mode: 2, label: "Catch", viewModel: viewModel)
-                        ToggleButton(mode: 3, label: "Mania", viewModel: viewModel)
+                        ToggleButton(mode: 0, label: "mode-osu-small", viewModel: viewModel)
+                        ToggleButton(mode: 1, label: "mode-taiko-small", viewModel: viewModel)
+                        ToggleButton(mode: 2, label: "mode-fruits-small", viewModel: viewModel)
+                        ToggleButton(mode: 3, label: "mode-mania-small", viewModel: viewModel)
                     }
-                    .padding(.top, 20)
+                    .padding(.top, 31)
                 }
             }
         }
@@ -78,8 +95,8 @@ struct SearchView: View {
                 viewModel.mode = mode
                 viewModel.search()
             }) {
-                Text(label)
-                    .frame(width: 70, height: 40)
+                Image(label)
+                    .frame(width: 50, height: 50)
                     .background(viewModel.mode == mode ? Color(red: 255/255, green: 143/255, blue: 171/255) : Color.gray)
                     .foregroundColor(.white)
                     .cornerRadius(10)
@@ -87,10 +104,11 @@ struct SearchView: View {
             }
         }
     }
-    
-    struct SearchView_Previews: PreviewProvider {
-        static var previews: some View {
-            SearchView()
-        }
+}
+
+struct SearchView_Previews: PreviewProvider {
+    static var previews: some View {
+        SearchView()
     }
 }
+
