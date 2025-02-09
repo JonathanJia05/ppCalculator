@@ -4,7 +4,7 @@ from app.services.calculation import calculatepp
 from app.services.dbSearch import searchDB
 from app.services.mapSearch import getBeatmapDetails
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import Optional
 
 app = FastAPI()
 
@@ -44,10 +44,7 @@ async def post_calculate_pp(data: PPRequest):
 
 @app.get("/searchdb")
 def search(mode: int, query: str = "", page: int = 1):
-    if query.strip() == "":
-        results = searchDB(mode, "", page)
-    else:
-        results = searchDB(mode, query, page)
+    results = searchDB(query=query, page=page, mode=mode)
     return results
 
 
