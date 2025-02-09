@@ -3,7 +3,7 @@ from psycopg2.extras import RealDictCursor
 from app.database.config import load_config
 
 
-def searchDB(query: str, page: int = 1):
+def searchDB(mode: int, query: str, page: int = 1):
     pageSize = 50
     offset = (page - 1) * pageSize
 
@@ -20,10 +20,11 @@ def searchDB(query: str, page: int = 1):
                 mapper,
                 playcount AS plays
             FROM beatmaps
+            WHERE mode = %s
             ORDER BY playcount DESC
             LIMIT %s OFFSET %s;
         """
-        params = (pageSize, offset)
+        params = (mode, pageSize, offset)
     else:
         sql = """
             SELECT 
@@ -38,10 +39,11 @@ def searchDB(query: str, page: int = 1):
                 playcount AS plays
             FROM beatmaps
             WHERE search_vector @@ plainto_tsquery('english', %s)
+              AND mode = %s
             ORDER BY playcount DESC
             LIMIT %s OFFSET %s;
         """
-        params = (query, pageSize, offset)
+        params = (query, mode, pageSize, offset)
 
     results = []
     try:
@@ -53,7 +55,7 @@ def searchDB(query: str, page: int = 1):
         if query.strip() != "":
             print(f"'{query}' results fetched")
         else:
-            print(f"Default results")
+            print("Default results")
     except Exception as error:
         print("Error retrieving beatmap:", error)
     return results

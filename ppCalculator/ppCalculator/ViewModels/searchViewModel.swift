@@ -14,6 +14,7 @@ class SearchViewModel: ObservableObject {
     @Published var query: String = ""
     @Published var maps: [Map] = []
     @Published var isLoading: Bool = false
+    @Published var mode: Int = 0
     
     private var currentPage = 1
     private let baseURL = "http://127.0.0.1:8000/searchdb"
@@ -39,7 +40,7 @@ class SearchViewModel: ObservableObject {
             .lowercased()
             .addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
         
-        let urlString = "\(baseURL)?query=\(encodedQuery)&page=\(currentPage)"
+        let urlString = "\(baseURL)?query=\(encodedQuery)&page=\(currentPage)&mode=\(mode)"
         guard let url = URL(string: urlString) else {
             print("Invalid URL: \(urlString)")
             self.isLoading = false
