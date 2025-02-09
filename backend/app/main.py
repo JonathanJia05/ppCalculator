@@ -43,11 +43,11 @@ async def post_calculate_pp(data: PPRequest):
 
 
 @app.get("/searchdb")
-def search(query: str = "", page: int = 1):
+def search(mode: int, query: str = "", page: int = 1):
     if query.strip() == "":
-        results = searchDB("", page)
+        results = searchDB(mode, "", page)
     else:
-        results = searchDB(query, page)
+        results = searchDB(mode, query, page)
     return results
 
 

@@ -13,11 +13,9 @@ struct SearchView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                // Full-screen background color
                 Color(red: 34/255, green: 40/255, blue: 42/255)
                     .ignoresSafeArea()
                 
-                // Show ProgressView if loading and no maps are loaded yet
                 if viewModel.isLoading && viewModel.maps.isEmpty {
                     ProgressView()
                         .progressViewStyle(CircularProgressViewStyle(tint: .white))
@@ -55,14 +53,44 @@ struct SearchView: View {
             .onAppear {
                 viewModel.search()
             }
+            .toolbar {
+                ToolbarItemGroup(placement: .bottomBar) {
+                    HStack{
+                        ToggleButton(mode: 0, label: "Osu!", viewModel: viewModel)
+                        ToggleButton(mode: 1, label: "Taiko", viewModel: viewModel)
+                        ToggleButton(mode: 2, label: "Catch", viewModel: viewModel)
+                        ToggleButton(mode: 3, label: "Mania", viewModel: viewModel)
+                    }
+                    .padding(.top, 20)
+                }
+            }
         }
         .environment(\.colorScheme, .dark)
     }
-}
-
-
-struct SearchView_Previews: PreviewProvider {
-    static var previews: some View {
-        SearchView()
+    
+    struct ToggleButton: View {
+        let mode: Int
+        let label: String
+        @ObservedObject var viewModel: SearchViewModel
+        
+        var body: some View {
+            Button(action: {
+                viewModel.mode = mode
+                viewModel.search()
+            }) {
+                Text(label)
+                    .frame(width: 70, height: 40)
+                    .background(viewModel.mode == mode ? Color(red: 255/255, green: 143/255, blue: 171/255) : Color.gray)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+                    .animation(.easeInOut(duration: 0.1), value: viewModel.mode)
+            }
+        }
+    }
+    
+    struct SearchView_Previews: PreviewProvider {
+        static var previews: some View {
+            SearchView()
+        }
     }
 }
