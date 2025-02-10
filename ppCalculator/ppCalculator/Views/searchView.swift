@@ -43,46 +43,45 @@ struct SearchView: View {
                     .scrollContentBackground(.hidden)
                 }
             }
+            .toolbar {
+                toolbarTopItems
+                toolbarBottomItems
+            }
             .toolbarBackground(Color(red: 34/255, green: 40/255, blue: 42/255), for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .navigationTitle("Search for a map")
             .searchable(text: $viewModel.query)
-            .onSubmit(of: .search) {
-                viewModel.search()
-            }
-            .onAppear {
-                viewModel.search()
-            }
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    HStack{
-                        Button(action: {
-                            viewModel.search()
-                        }) {
-                            Image(systemName: "house.fill")
-                                .foregroundColor(.white)
-                        }
-                        
-                        Button(action: {
-                            viewModel.search()
-                        }) {
-                            Image(systemName: "bubble.left.fill")
-                                .foregroundColor(.white)
-                        }
-                    }
+            .onSubmit(of: .search) { viewModel.search() }
+            .onAppear { viewModel.search() }
+        }
+        .environment(\.colorScheme, .dark)
+    }
+    
+    private var toolbarTopItems: some ToolbarContent {
+        ToolbarItem(placement: .topBarTrailing) {
+            HStack {
+                Button(action: { viewModel.search() }) {
+                    Image(systemName: "house.fill")
+                        .foregroundColor(.white)
                 }
-                ToolbarItemGroup(placement: .bottomBar) {
-                    HStack{
-                        ToggleButton(mode: 0, label: "mode-osu-small", viewModel: viewModel)
-                        ToggleButton(mode: 1, label: "mode-taiko-small", viewModel: viewModel)
-                        ToggleButton(mode: 2, label: "mode-fruits-small", viewModel: viewModel)
-                        ToggleButton(mode: 3, label: "mode-mania-small", viewModel: viewModel)
-                    }
-                    .padding(.top, 31)
+                NavigationLink(destination: feedbackView()) {
+                    Image(systemName: "bubble.left.fill")
+                        .foregroundColor(.white)
                 }
             }
         }
-        .environment(\.colorScheme, .dark)
+    }
+    
+    private var toolbarBottomItems: some ToolbarContent {
+        ToolbarItemGroup(placement: .bottomBar) {
+            HStack {
+                ToggleButton(mode: 0, label: "mode-osu-small", viewModel: viewModel)
+                ToggleButton(mode: 1, label: "mode-taiko-small", viewModel: viewModel)
+                ToggleButton(mode: 2, label: "mode-fruits-small", viewModel: viewModel)
+                ToggleButton(mode: 3, label: "mode-mania-small", viewModel: viewModel)
+            }
+            .padding(.top, 31)
+        }
     }
     
     struct ToggleButton: View {
@@ -111,4 +110,5 @@ struct SearchView_Previews: PreviewProvider {
         SearchView()
     }
 }
+
 

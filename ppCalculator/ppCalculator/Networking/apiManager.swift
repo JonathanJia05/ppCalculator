@@ -11,6 +11,7 @@ import SwiftUI
 class ApiRequests : ObservableObject{
     @Published var data: [Map] = []
     @Published var pp: Double?
+    @Published var feedbackResponse: String = ""
     
     func getMaps(from url: URL, completion: @escaping () -> Void = {}) {
         URLSession.shared.dataTask(with: url) { [weak self] data, _, error in
@@ -66,6 +67,40 @@ class ApiRequests : ObservableObject{
         }
         .resume()
         
+    }
+    
+    func sendFeedback(with feedback: Feedback, completion: @escaping () -> Void = {}) {
+        guard let baseURL = URL(string: "http://127.0.0.1:8000/feedback") else {
+            print("url is not valid")
+            return
+        }
+        var request = URLRequest(url: baseURL)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        do {
+            let jsonData = try JSONEncoder().encode(feedback)
+            request.httpBody = jsonData
+        } catch {
+            print("Unable to send feedback")
+            return
+        }
+        
+        URLSession.shared.dataTask(with: request) { [weak self] data, _, error in
+            guard let data = data, error == nil else {
+                print("Failed to post: \(error?.localizedDescription ?? "Unknown error")")
+                completion()
+                return
+            }
+            do {
+                let feedbackResponse = try JSONDecoder().decode(FeedbackResponse.self, from: data)
+                self?.feedbackResponse = feedbackResponse.message
+                print("Response received")
+            } catch {
+                print("Failed to decode JSON: \(error.localizedDescription)")
+            }
+            completion()
+        }
+        .resume()
     }
 }
 

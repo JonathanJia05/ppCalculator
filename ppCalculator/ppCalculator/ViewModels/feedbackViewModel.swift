@@ -8,6 +8,17 @@
 import Foundation
 import SwiftUI
 
-class feedbackViewModel: ObservableObject {
+class FeedbackViewModel: ObservableObject {
+    @Published var userFeedback: String = ""
+    @Published var feedbackResponse: String = ""
+    private let api = ApiRequests()
     
+    func feedback() {
+        let feedbackRequest = Feedback(message: userFeedback)
+        api.sendFeedback(with: feedbackRequest) {
+            DispatchQueue.main.async{
+                self.feedbackResponse = self.api.feedbackResponse
+            }
+        }
+    }
 }
