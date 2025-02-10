@@ -1,9 +1,11 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, BackgroundTasks
 from app.services.search import searchMaps
 from app.services.calculation import calculatepp
 from app.services.dbSearch import searchDB
 from app.services.mapSearch import getBeatmapDetails
 from app.models.PPRequest import PPRequest
+from app.services.feedback import send_feedback_email
+from app.models.feedback import Feedback
 
 app = FastAPI()
 
@@ -46,3 +48,9 @@ async def beatmap_endpoint(map_id: int):
         return result
     except Exception as error:
         return {"error": str(error)}
+
+
+@app.post("/feedback")
+async def receive_feedback(feedback: Feedback, background_tasks: BackgroundTasks):
+    background_tasks.add_task(send_feedback_email, feedback)
+    return {"message": "Thank you for your feedback!"}
