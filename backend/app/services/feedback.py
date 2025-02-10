@@ -12,14 +12,10 @@ app = FastAPI()
 
 def send_feedback_email(feedback: Feedback):
     msg = EmailMessage()
-    msg["Subject"] = f"Feedback from {feedback.name}: {feedback.subject}"
+    msg["Subject"] = "Feedback"
     msg["From"] = os.getenv("EMAIL_FROM")
     msg["To"] = os.getenv("EMAIL_TO")
-    msg.set_content(
-        f"Name: {feedback.name}\n"
-        f"Email: {feedback.email}\n\n"
-        f"Message:\n{feedback.message}"
-    )
+    msg.set_content(f"Message:\n{feedback.message}")
 
     smtp_server = os.getenv("SMTP_SERVER")
     smtp_port = int(os.getenv("SMTP_PORT", "587"))
