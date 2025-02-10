@@ -3,18 +3,9 @@ from app.services.search import searchMaps
 from app.services.calculation import calculatepp
 from app.services.dbSearch import searchDB
 from app.services.mapSearch import getBeatmapDetails
-from pydantic import BaseModel
-from typing import Optional
+from app.models.PPRequest import PPRequest
 
 app = FastAPI()
-
-
-class PPRequest(BaseModel):
-    beatmap_id: int
-    accuracy: float
-    misses: int = 0
-    combo: Optional[int] = None
-    mods: str = ""
 
 
 @app.get("/search")
