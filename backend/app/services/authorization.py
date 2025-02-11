@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import jwt
 from fastapi import HTTPException, status
 import os
@@ -8,19 +8,14 @@ load_dotenv(override=True)
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM")
-ACCESS_TOKEN_EXPIRE_MINUTES = os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES")
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
 VALID_CLIENT_ID = os.getenv("VALID_CLIENT_ID")
 VALID_CLIENT_SECRET = os.getenv("VALID_CLIENT_SECRET")
 
 
-def createAccessToken(data: dict, expiresDelta: timedelta = None):
+def createAccessToken(data: dict):
     encodeTarget = data.copy()
-    if expiresDelta:
-        expire = datetime.now(datetime.timezone.utc) + expiresDelta
-    else:
-        expire = datetime.now(datetime.timezone.utc) + timedelta(
-            minutes=ACCESS_TOKEN_EXPIRE_MINUTES
-        )
+    expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     encodeTarget.update({"exp": expire})
     encodedJwt = jwt.encode(encodeTarget, SECRET_KEY, algorithm=ALGORITHM)
     return encodedJwt
