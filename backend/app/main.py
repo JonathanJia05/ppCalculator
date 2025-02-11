@@ -10,7 +10,6 @@ from app.models.auth import authModel
 from app.services.authorization import (
     createAccessToken,
     authenticateClient,
-    verifyToken,
 )
 from app.models.token import token
 from app.dependencies.dependencies import getCurrentToken
