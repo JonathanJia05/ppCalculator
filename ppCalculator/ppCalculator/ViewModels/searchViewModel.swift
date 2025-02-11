@@ -9,15 +9,14 @@ import Foundation
 import SwiftUI
 
 class SearchViewModel: ObservableObject {
-    private let api = ApiRequests()
-    
     @Published var query: String = ""
     @Published var maps: [Map] = []
     @Published var isLoading: Bool = false
-    
+    @Published var mode: Int = 0
+
     private var currentPage = 1
-    private let baseURL = "http://127.0.0.1:8000/searchdb"
     private var canLoadMore = true
+    private let api = ApiRequests()
     
     func search() {
         currentPage = 1
@@ -35,25 +34,13 @@ class SearchViewModel: ObservableObject {
     private func loadPage() {
         isLoading = true
         
-        let encodedQuery = query
-            .lowercased()
-            .addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-        
-        let urlString = "\(baseURL)?query=\(encodedQuery)&page=\(currentPage)"
-        guard let url = URL(string: urlString) else {
-            print("Invalid URL: \(urlString)")
-            self.isLoading = false
-            return
-        }
-        
-        api.getMaps(from: url) {
+        api.getMaps(query: query, page: currentPage, mode: mode) { [weak self] in
             DispatchQueue.main.async {
+                guard let self = self else { return }
                 let newMaps = self.api.data
-                
                 if newMaps.isEmpty {
                     self.canLoadMore = false
                 }
-                
                 self.maps.append(contentsOf: newMaps)
                 self.isLoading = false
             }

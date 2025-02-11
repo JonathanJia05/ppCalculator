@@ -13,11 +13,9 @@ struct SearchView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                // Full-screen background color
                 Color(red: 34/255, green: 40/255, blue: 42/255)
                     .ignoresSafeArea()
                 
-                // Show ProgressView if loading and no maps are loaded yet
                 if viewModel.isLoading && viewModel.maps.isEmpty {
                     ProgressView()
                         .progressViewStyle(CircularProgressViewStyle(tint: .white))
@@ -45,24 +43,72 @@ struct SearchView: View {
                     .scrollContentBackground(.hidden)
                 }
             }
+            .toolbar {
+                toolbarTopItems
+                toolbarBottomItems
+            }
             .toolbarBackground(Color(red: 34/255, green: 40/255, blue: 42/255), for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .navigationTitle("Search for a map")
             .searchable(text: $viewModel.query)
-            .onSubmit(of: .search) {
-                viewModel.search()
-            }
-            .onAppear {
-                viewModel.search()
-            }
+            .onSubmit(of: .search) { viewModel.search() }
+            .onAppear { viewModel.search() }
         }
         .environment(\.colorScheme, .dark)
     }
+    
+    private var toolbarTopItems: some ToolbarContent {
+        ToolbarItem(placement: .topBarTrailing) {
+            HStack {
+                Button(action: { viewModel.search() }) {
+                    Image(systemName: "house.fill")
+                        .foregroundColor(.white)
+                }
+                NavigationLink(destination: feedbackView()) {
+                    Image(systemName: "bubble.left.fill")
+                        .foregroundColor(.white)
+                }
+            }
+        }
+    }
+    
+    private var toolbarBottomItems: some ToolbarContent {
+        ToolbarItemGroup(placement: .bottomBar) {
+            HStack {
+                ToggleButton(mode: 0, label: "mode-osu-small", viewModel: viewModel)
+                ToggleButton(mode: 1, label: "mode-taiko-small", viewModel: viewModel)
+                ToggleButton(mode: 2, label: "mode-fruits-small", viewModel: viewModel)
+                ToggleButton(mode: 3, label: "mode-mania-small", viewModel: viewModel)
+            }
+            .padding(.top, 31)
+        }
+    }
+    
+    struct ToggleButton: View {
+        let mode: Int
+        let label: String
+        @ObservedObject var viewModel: SearchViewModel
+        
+        var body: some View {
+            Button(action: {
+                viewModel.mode = mode
+                viewModel.search()
+            }) {
+                Image(label)
+                    .frame(width: 50, height: 50)
+                    .background(viewModel.mode == mode ? Color(red: 255/255, green: 143/255, blue: 171/255) : Color.gray)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+                    .animation(.easeInOut(duration: 0.1), value: viewModel.mode)
+            }
+        }
+    }
 }
-
 
 struct SearchView_Previews: PreviewProvider {
     static var previews: some View {
         SearchView()
     }
 }
+
+
