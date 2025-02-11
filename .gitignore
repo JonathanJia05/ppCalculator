@@ -22,5 +22,5 @@ notes.md
 
 database.ini
 notes.txt
-Secrets.xcconfig
+ppCalculator/Secrets.xcconfig
 Info.plist
