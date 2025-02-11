@@ -14,10 +14,15 @@ class FeedbackViewModel: ObservableObject {
     private let api = ApiRequests()
     
     func feedback() {
-        let feedbackRequest = Feedback(message: userFeedback)
-        api.sendFeedback(with: feedbackRequest) {
-            DispatchQueue.main.async{
-                self.feedbackResponse = self.api.feedbackResponse
+        if self.userFeedback.isEmpty {
+            self.feedbackResponse = "Field empty"
+        }
+        else {
+            let feedbackRequest = Feedback(message: userFeedback)
+            api.sendFeedback(with: feedbackRequest) {
+                DispatchQueue.main.async{
+                    self.feedbackResponse = self.api.feedbackResponse
+                }
             }
         }
     }
