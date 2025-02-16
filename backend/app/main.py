@@ -1,4 +1,4 @@
-from fastapi import FastAPI, BackgroundTasks, HTTPException, Header, status, Depends
+from fastapi import FastAPI, BackgroundTasks, HTTPException, status, Depends
 from app.services.search import searchMaps
 from app.services.calculation import calculatepp
 from app.services.dbSearch import searchDB
@@ -6,13 +6,11 @@ from app.services.mapSearch import getBeatmapDetails
 from app.models.PPRequest import PPRequest
 from app.services.feedback import send_feedback_email
 from app.models.feedback import Feedback
-from app.models.auth import authModel
-from app.services.authorization import (
-    createAccessToken,
-    authenticateClient,
-)
-from app.models.token import token
+from app.models.auth import authModel, token
+from app.services.authorization import createAccessToken, authenticateClient
 from app.dependencies.dependencies import getCurrentToken
+from app.services.authorization import generateAndStoreAuthCode
+from app.services.authorization import generateToken
 
 app = FastAPI()
 
@@ -76,11 +74,26 @@ async def receive_feedback(
 
 @app.post("/auth")
 async def authenticate(credentials: authModel):
-    if authenticateClient(credentials.client_id, credentials.client_secret) == False:
+    if authenticateClient(credentials.client_id) == False:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid client credentials",
         )
-    tokenCreate = createAccessToken(data={"sub": credentials.client_id})
-    tokenResult = token(access_token=tokenCreate, token_type="Bearer ")
-    return tokenResult
+    if credentials.code_challenge is None or credentials.challenge_method is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No code challenge given",
+        )
+    authorizationCode = generateAndStoreAuthCode(credentials)
+    return authorizationCode
+
+
+@app.post("/token")
+async def getToken(tokenRequest: token):
+    if tokenRequest.auth_code is None or tokenRequest.code_verifier is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Missing parameters",
+        )
+    tokenResponse = generateToken(tokenRequest)
+    return tokenResponse
