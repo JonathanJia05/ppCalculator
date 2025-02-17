@@ -10,5 +10,6 @@ import SwiftUI
 
 struct AuthRequest: Hashable, Codable {
     var client_id: String
-    var client_secret: String
+    var code_challenge: String
+    var challenge_method: String
 }

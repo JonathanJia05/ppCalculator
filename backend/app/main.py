@@ -88,7 +88,7 @@ async def authenticate(credentials: authModel):
             detail="No code challenge given",
         )
     authorizationCode = generateAndStoreAuthCode(credentials)
-    return authorizationCode
+    return {"auth_code": authorizationCode}
 
 
 @app.post("/token")
