@@ -1,16 +1,19 @@
 from fastapi import FastAPI, BackgroundTasks, HTTPException, status, Depends
+from app.dependencies.dependencies import getCurrentToken
+from app.models.PPRequest import PPRequest
+from app.models.feedback import Feedback
+from app.models.auth import authModel, token
 from app.services.search import searchMaps
 from app.services.calculation import calculatepp
 from app.services.dbSearch import searchDB
 from app.services.mapSearch import getBeatmapDetails
-from app.models.PPRequest import PPRequest
 from app.services.feedback import send_feedback_email
-from app.models.feedback import Feedback
-from app.models.auth import authModel, token
-from app.services.authorization import createAccessToken, authenticateClient
-from app.dependencies.dependencies import getCurrentToken
-from app.services.authorization import generateAndStoreAuthCode
-from app.services.authorization import generateToken
+from app.services.authorization import (
+    authenticateClient,
+    generateAndStoreAuthCode,
+    generateToken,
+)
+
 
 app = FastAPI()
 
