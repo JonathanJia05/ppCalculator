@@ -37,6 +37,7 @@ jobs:
           echo "$SSH_KEY" > key.pem
           chmod 600 key.pem
           ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${EC2_IP:-YOUR_EC2_PUBLIC_IP} "\
+            docker login --username ${{ secrets.DOCKER_USERNAME }} --password ${{ secrets.DOCKER_PASSWORD }} && \
             docker pull ${{ secrets.DOCKER_USERNAME }}/ppcalculatorbackend:latest && \
             docker stop ppcalculatorbackend || true && \
             docker rm ppcalculatorbackend || true && \
