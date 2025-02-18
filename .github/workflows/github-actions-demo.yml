@@ -38,9 +38,24 @@ jobs:
         run: |
           echo "$SSH_KEY" > key.pem
           chmod 600 key.pem
+
           ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${EC2_IP:-YOUR_EC2_PUBLIC_IP} "\
+            echo 'CLIENT_ID=${{ secrets.CLIENT_ID }}' > .env && \
+            echo 'CLIENT_SECRET=${{ secrets.CLIENT_SECRET }}' >> .env && \
+            echo 'EMAIL_FROM=${{ secrets.EMAIL_FROM }}' >> .env && \
+            echo 'EMAIL_TO=${{ secrets.EMAIL_TO }}' >> .env && \
+            echo 'SMTP_SERVER=${{ secrets.SMTP_SERVER }}' >> .env && \
+            echo 'SMTP_PORT=${{ secrets.SMTP_PORT }}' >> .env && \
+            echo 'SMTP_USER=${{ secrets.SMTP_USER }}' >> .env && \
+            echo 'SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}' >> .env && \
+            echo 'SECRET_KEY=${{ secrets.SECRET_KEY }}' >> .env && \
+            echo 'ALGORITHM=${{ secrets.ALGORITHM }}' >> .env && \
+            echo 'ACCESS_TOKEN_EXPIRE_MINUTES=${{ secrets.ACCESS_TOKEN_EXPIRE_MINUTES }}' >> .env && \
+            echo 'VALID_CLIENT_ID=${{ secrets.VALID_CLIENT_ID }}' >> .env && \
+            echo 'REDIS_HOST=${{ secrets.REDIS_HOST }}' >> .env && \
+            echo 'REDIS_PORT=${{ secrets.REDIS_PORT }}' >> .env && \
             docker login --username ${{ secrets.DOCKER_USERNAME }} --password ${{ secrets.DOCKER_PASSWORD }} && \
             docker pull ${{ secrets.DOCKER_USERNAME }}/ppcalculatorbackend:latest && \
             docker stop ppcalculatorbackend || true && \
             docker rm ppcalculatorbackend || true && \
-            docker run -d --name ppcalculatorbackend -p 8000:8000 ${{ secrets.DOCKER_USERNAME }}/ppcalculatorbackend:latest"
+            docker run -d --name ppcalculatorbackend -p 8000:8000 --env-file .env ${{ secrets.DOCKER_USERNAME }}/ppcalculatorbackend:latest"
