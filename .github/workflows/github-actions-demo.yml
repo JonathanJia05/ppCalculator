@@ -28,6 +28,7 @@ jobs:
           context: .
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/ppcalculatorbackend:latest
+          platforms: linux/arm64
 
       - name: Deploy to EC2
         env:
