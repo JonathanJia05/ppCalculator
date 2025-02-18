@@ -1,1 +1,41 @@
+name: Build and Deploy
 
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/ppcalculatorbackend:latest
+
+      - name: Deploy to EC2
+        env:
+          SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+          EC2_IP: ${{ secrets.EC2_PUBLIC_IP }}
+        run: |
+          ssh -o StrictHostKeyChecking=no -i "$SSH_KEY" ec2-user@${EC2_IP:-YOUR_EC2_PUBLIC_IP} "\
+            docker pull yourdockerhubusername/ppcalculatorbackend:latest && \
+            docker stop ppcalculatorbackend || true && \
+            docker rm ppcalculatorbackend || true && \
+            docker run -d --name ppcalculatorbackend -p 8000:8000 yourdockerhubusername/ppcalculatorbackend:latest"
