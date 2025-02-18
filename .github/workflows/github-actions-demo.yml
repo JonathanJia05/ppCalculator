@@ -34,10 +34,10 @@ jobs:
           SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
           EC2_IP: ${{ secrets.EC2_PUBLIC_IP }}
         run: |
-          echo "$SSH_key" > key.pem
+          echo "$SSH_KEY" > key.pem
           chmod 600 key.pem
           ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${EC2_IP:-YOUR_EC2_PUBLIC_IP} "\
-            docker pull yourdockerhubusername/ppcalculatorbackend:latest && \
+            docker pull ${{ secrets.DOCKER_USERNAME }}/ppcalculatorbackend:latest && \
             docker stop ppcalculatorbackend || true && \
             docker rm ppcalculatorbackend || true && \
-            docker run -d --name ppcalculatorbackend -p 8000:8000 yourdockerhubusername/ppcalculatorbackend:latest"
+            docker run -d --name ppcalculatorbackend -p 8000:8000 ${{ secrets.DOCKER_USERNAME }}/ppcalculatorbackend:latest"
