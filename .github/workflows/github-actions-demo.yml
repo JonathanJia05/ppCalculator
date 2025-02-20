@@ -46,7 +46,6 @@ jobs:
             echo 'user=postgres' >> database.ini && \
             echo 'password=${{ secrets.DB_PASSWORD }}' >> database.ini && \
             \
-
             echo 'CLIENT_ID=${{ secrets.CLIENT_ID }}' > .env && \
             echo 'CLIENT_SECRET=${{ secrets.CLIENT_SECRET }}' >> .env && \
             echo 'EMAIL_FROM=${{ secrets.EMAIL_FROM }}' >> .env && \
@@ -62,9 +61,8 @@ jobs:
             echo 'REDIS_HOST=${{ secrets.REDIS_HOST }}' >> .env && \
             echo 'REDIS_PORT=${{ secrets.REDIS_PORT }}' >> .env && \
             \
-
             docker login --username ${{ secrets.DOCKER_USERNAME }} --password ${{ secrets.DOCKER_PASSWORD }} && \
             docker pull ${{ secrets.DOCKER_USERNAME }}/ppcalculatorbackend:latest && \
             docker stop ppcalculatorbackend || true && \
             docker rm ppcalculatorbackend || true && \
-            docker run -d --name ppcalculatorbackend -p 8000:8000 --env-file .env ${{ secrets.DOCKER_USERNAME }}/ppcalculatorbackend:latest"
+            docker run -d --name ppcalculatorbackend --network my-network -p 8000:8000 --env-file .env ${{ secrets.DOCKER_USERNAME }}/ppcalculatorbackend:latest"
