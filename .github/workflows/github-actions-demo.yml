@@ -39,30 +39,36 @@ jobs:
           echo "$SSH_KEY" > key.pem
           chmod 600 key.pem
 
-          ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${EC2_IP:-YOUR_EC2_PUBLIC_IP} "\
-            echo '[postgresql]' > database.ini && \
-            echo 'host=postgres-db' >> database.ini && \
-            echo 'database=osudb' >> database.ini && \
-            echo 'user=postgres' >> database.ini && \
-            echo 'password=${{ secrets.DB_PASSWORD }}' >> database.ini && \
-            \
-            echo 'CLIENT_ID=${{ secrets.CLIENT_ID }}' > .env && \
-            echo 'CLIENT_SECRET=${{ secrets.CLIENT_SECRET }}' >> .env && \
-            echo 'EMAIL_FROM=${{ secrets.EMAIL_FROM }}' >> .env && \
-            echo 'EMAIL_TO=${{ secrets.EMAIL_TO }}' >> .env && \
-            echo 'SMTP_SERVER=${{ secrets.SMTP_SERVER }}' >> .env && \
-            echo 'SMTP_PORT=${{ secrets.SMTP_PORT }}' >> .env && \
-            echo 'SMTP_USER=${{ secrets.SMTP_USER }}' >> .env && \
-            echo 'SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}' >> .env && \
-            echo 'SECRET_KEY=${{ secrets.SECRET_KEY }}' >> .env && \
-            echo 'ALGORITHM=${{ secrets.ALGORITHM }}' >> .env && \
-            echo 'ACCESS_TOKEN_EXPIRE_MINUTES=${{ secrets.ACCESS_TOKEN_EXPIRE_MINUTES }}' >> .env && \
-            echo 'VALID_CLIENT_ID=${{ secrets.VALID_CLIENT_ID }}' >> .env && \
-            echo 'REDIS_HOST=${{ secrets.REDIS_HOST }}' >> .env && \
-            echo 'REDIS_PORT=${{ secrets.REDIS_PORT }}' >> .env && \
-            \
-            docker login --username ${{ secrets.DOCKER_USERNAME }} --password ${{ secrets.DOCKER_PASSWORD }} && \
-            docker pull ${{ secrets.DOCKER_USERNAME }}/ppcalculatorbackend:latest && \
-            docker stop ppcalculatorbackend || true && \
-            docker rm ppcalculatorbackend || true && \
-            docker run -d --name ppcalculatorbackend --network my-network -p 8000:8000 --env-file .env -v /home/ec2-user/database.ini:/app/database.ini cheekysquid1/ppcalculatorbackend:latest
+          ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${EC2_IP:-YOUR_EC2_PUBLIC_IP} <<EOF
+          mkdir -p /home/ec2-user/config
+
+          echo "[postgresql]" > /home/ec2-user/config/database.ini
+          echo "host=postgres-db" >> /home/ec2-user/config/database.ini
+          echo "database=osudb" >> /home/ec2-user/config/database.ini
+          echo "user=postgres" >> /home/ec2-user/config/database.ini
+          echo "password=${{ secrets.DB_PASSWORD }}" >> /home/ec2-user/config/database.ini
+
+          echo "CLIENT_ID=${{ secrets.CLIENT_ID }}" > /home/ec2-user/config/.env
+          echo "CLIENT_SECRET=${{ secrets.CLIENT_SECRET }}" >> /home/ec2-user/config/.env
+          echo "EMAIL_FROM=${{ secrets.EMAIL_FROM }}" >> /home/ec2-user/config/.env
+          echo "EMAIL_TO=${{ secrets.EMAIL_TO }}" >> /home/ec2-user/config/.env
+          echo "SMTP_SERVER=${{ secrets.SMTP_SERVER }}" >> /home/ec2-user/config/.env
+          echo "SMTP_PORT=${{ secrets.SMTP_PORT }}" >> /home/ec2-user/config/.env
+          echo "SMTP_USER=${{ secrets.SMTP_USER }}" >> /home/ec2-user/config/.env
+          echo "SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}" >> /home/ec2-user/config/.env
+          echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> /home/ec2-user/config/.env
+          echo "ALGORITHM=${{ secrets.ALGORITHM }}" >> /home/ec2-user/config/.env
+          echo "ACCESS_TOKEN_EXPIRE_MINUTES=${{ secrets.ACCESS_TOKEN_EXPIRE_MINUTES }}" >> /home/ec2-user/config/.env
+          echo "VALID_CLIENT_ID=${{ secrets.VALID_CLIENT_ID }}" >> /home/ec2-user/config/.env
+          echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> /home/ec2-user/config/.env
+          echo "REDIS_PORT=${{ secrets.REDIS_PORT }}" >> /home/ec2-user/config/.env
+
+          docker login --username ${{ secrets.DOCKER_USERNAME }} --password ${{ secrets.DOCKER_PASSWORD }}
+
+          docker pull ${{ secrets.DOCKER_USERNAME }}/ppcalculatorbackend:latest
+
+          docker stop ppcalculatorbackend || true
+          docker rm ppcalculatorbackend || true
+
+          docker run -d --name ppcalculatorbackend --network my-network -p 8000:8000 --env-file /home/ec2-user/config/.env -v /home/ec2-user/config/database.ini:/app/database.ini ${{ secrets.DOCKER_USERNAME }}/ppcalculatorbackend:latest
+          EOF
