@@ -65,4 +65,4 @@ jobs:
             docker pull ${{ secrets.DOCKER_USERNAME }}/ppcalculatorbackend:latest && \
             docker stop ppcalculatorbackend || true && \
             docker rm ppcalculatorbackend || true && \
-            docker run -d --name ppcalculatorbackend --network my-network -p 8000:8000 --env-file .env ${{ secrets.DOCKER_USERNAME }}/ppcalculatorbackend:latest"
+            docker run -d --name ppcalculatorbackend --network my-network -p 8000:8000 --env-file .env -v /home/ec2-user/database.ini:/app/database.ini cheekysquid1/ppcalculatorbackend:latest
