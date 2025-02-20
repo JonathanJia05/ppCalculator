@@ -13,7 +13,7 @@ class ApiRequests: ObservableObject {
     @Published var pp: Double?
     @Published var feedbackResponse: String = ""
     
-    private let baseURLString = "http://127.0.0.1:8000"
+    private let baseURLString = "https://osu-db.com"
     private var token = ""
     private var token_type = ""
     private var client_id: String {
