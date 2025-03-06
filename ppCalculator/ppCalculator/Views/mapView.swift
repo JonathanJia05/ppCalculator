@@ -8,10 +8,17 @@
 import Foundation
 import SwiftUI
 
+// Enum to represent each text field.
+enum Field: Hashable {
+    case accuracy, misses, combo
+}
+
 struct MapView: View {
     
     @StateObject private var viewModel: PPViewModel
+    @FocusState private var focusedField: Field?
     private let map: Map
+    
     init(map: Map) {
         self.map = map
         _viewModel = StateObject(wrappedValue: PPViewModel(map: map))
@@ -20,7 +27,8 @@ struct MapView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             
-            HStack{
+            // Map Image Section
+            HStack {
                 AsyncImage(url: viewModel.mapImageURL) { phase in
                     if let image = phase.image {
                         image
@@ -35,6 +43,7 @@ struct MapView: View {
             .frame(maxWidth: .infinity)
             .padding(.top, 8)
             
+            // Map Details Section
             HStack {
                 VStack(alignment: .leading) {
                     Text(map.title)
@@ -56,7 +65,8 @@ struct MapView: View {
             .padding(.horizontal, 22)
             .padding(.vertical, 3)
             
-            VStack{
+            // Input Fields Section
+            VStack {
                 HStack {
                     Text("Accuracy: ")
                         .frame(width: 100, alignment: .leading)
@@ -64,6 +74,7 @@ struct MapView: View {
                         .keyboardType(.decimalPad)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .frame(width: 100)
+                        .focused($focusedField, equals: .accuracy)
                 }
                 
                 HStack {
@@ -73,6 +84,7 @@ struct MapView: View {
                         .keyboardType(.numberPad)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .frame(width: 100)
+                        .focused($focusedField, equals: .misses)
                 }
                 
                 HStack {
@@ -82,8 +94,10 @@ struct MapView: View {
                         .keyboardType(.numberPad)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .frame(width: 100)
+                        .focused($focusedField, equals: .combo)
                 }
                 
+                // Toggle buttons section
                 HStack {
                     ToggleButton(mod: "dt", label: "DT", viewModel: viewModel)
                     ToggleButton(mod: "hr", label: "HR", viewModel: viewModel)
@@ -91,13 +105,14 @@ struct MapView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
                 .padding(.top, 10)
-                
             }
             .padding()
             
-            VStack{
+            // Calculation and Result Section
+            VStack {
                 Button(action: {
                     viewModel.calculatePP()
+                    focusedField = nil // Dismiss keyboard after calculation.
                 }) {
                     Text("Calculate")
                         .padding(8)
@@ -117,29 +132,34 @@ struct MapView: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: 100, alignment: .center)
+            
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(Color(red: 34/255, green: 40/255, blue: 42/255))
-    }
-    
-    struct ToggleButton: View {
-        let mod: String
-        let label: String
-        @ObservedObject var viewModel: PPViewModel
-        
-        var body: some View {
-            Button(action: {
-                viewModel.toggleMod(mod: mod)
-            }) {
-                Text(label)
-                    .frame(width: 80, height: 50)
-                    .background(viewModel.activeMods.contains(mod) ? Color(red: 255/255, green: 143/255, blue: 171/255) : Color.gray)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-                    .animation(.easeInOut(duration: 0.1), value: viewModel.activeMods)
-            }
+        // Dismiss the keyboard when tapping outside any text field.
+        .onTapGesture {
+            focusedField = nil
         }
     }
-
 }
+
+struct ToggleButton: View {
+    let mod: String
+    let label: String
+    @ObservedObject var viewModel: PPViewModel
+    
+    var body: some View {
+        Button(action: {
+            viewModel.toggleMod(mod: mod)
+        }) {
+            Text(label)
+                .frame(width: 80, height: 50)
+                .background(viewModel.activeMods.contains(mod) ? Color(red: 255/255, green: 143/255, blue: 171/255) : Color.gray)
+                .foregroundColor(.white)
+                .cornerRadius(10)
+                .animation(.easeInOut(duration: 0.1), value: viewModel.activeMods)
+        }
+    }
+}
+
