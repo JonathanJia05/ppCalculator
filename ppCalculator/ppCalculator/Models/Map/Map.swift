@@ -20,3 +20,9 @@ struct Map: Hashable, Codable {
     var plays: Int
 }
 
+extension Map {
+    var mapImageURL: URL? {
+        URL(string: map_image)
+    }
+}
+

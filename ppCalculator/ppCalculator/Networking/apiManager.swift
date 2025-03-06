@@ -9,34 +9,68 @@ import Foundation
 import SwiftUI
 
 class ApiRequests: ObservableObject {
+    // Published Properties
     @Published var data: [Map] = []
     @Published var pp: Double?
     @Published var feedbackResponse: String = ""
-    
+    @Published var isAuthorized: Bool = false
+
+    // Private Properties
     private let baseURLString = "https://osu-db.com"
     private var token = ""
-    private var token_type = ""
-    private var client_id: String {
-        return Bundle.main.object(forInfoDictionaryKey: "Client_id") as? String ?? ""
-    }
-    private var authCode: String = ""
-    private var codeVerifier: String = ""
+    private var tokenType = ""
     private var isAuthorizing = false
     
+    private var clientID: String {
+        Bundle.main.object(forInfoDictionaryKey: "Client_id") as? String ?? ""
+    }
+    private var authCode = ""
+    private var codeVerifier = ""
+    
+    // Initialization
     init() {
         loadTokenFromKeychain()
     }
-
+    
+    // Token Management
     private func loadTokenFromKeychain() {
         if let tokenData = KeychainHelper.shared.read(service: "com.ppCalculator.auth", account: "jwt"),
            let savedToken = String(data: tokenData, encoding: .utf8) {
-            self.token = savedToken
+            token = savedToken
+            // Set isAuthorized on the main thread so UI updates correctly
+            DispatchQueue.main.async { [weak self] in
+                self?.isAuthorized = true
+            }
             print("Token loaded from Keychain")
         } else {
             print("No token found in Keychain")
         }
     }
-
+    
+    // Ensures a valid token exists before calling completion handler
+    private func ensureToken(completion: @escaping () -> Void) {
+        if !token.isEmpty {
+            completion()
+        } else {
+            if !isAuthorizing {
+                isAuthorizing = true
+                print("No token available, authorizing...")
+                authorize { [weak self] in
+                    self?.exchangeToken {
+                        self?.isAuthorizing = false
+                        completion()
+                    }
+                }
+            } else {
+                print("Authorization in progress, waiting...")
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+                    self?.ensureToken(completion: completion)
+                }
+            }
+        }
+    }
+    
+    // Network Request Helper
     private func createRequest(url: URL, method: String, body: Data? = nil) -> URLRequest {
         var request = URLRequest(url: url)
         request.httpMethod = method
@@ -50,65 +84,52 @@ class ApiRequests: ObservableObject {
     private func performAuthorizedRequest(_ request: URLRequest,
                                             attempt: Int = 1,
                                             completion: @escaping (Data?, URLResponse?, Error?) -> Void) {
-        var mutableRequest = request
-
-        if self.token.isEmpty {
-            if !isAuthorizing {
-                isAuthorizing = true
-                print("No token available, authorizing...")
-                self.authorize {
-                    self.exchangeToken {
-                        self.isAuthorizing = false
-                        self.performAuthorizedRequest(request, attempt: attempt + 1, completion: completion)
-                    }
-                }
-            } else {
-                print("Authorization already in progress, waiting...")
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    self.performAuthorizedRequest(request, attempt: attempt, completion: completion)
-                }
-            }
-            return
-        } else {
-            mutableRequest.setValue("Bearer \(self.token)", forHTTPHeaderField: "Authorization")
-        }
-
-        URLSession.shared.dataTask(with: mutableRequest) { [weak self] data, response, error in
-            if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 401 {
-                print("401 Unauthorized.")
-                if attempt < 2 {
-                    self?.authorize {
-                        self?.exchangeToken {
-                            self?.performAuthorizedRequest(request, attempt: attempt + 1, completion: completion)
+        ensureToken { [weak self] in
+            guard let self = self else { return }
+            var authorizedRequest = request
+            authorizedRequest.setValue("Bearer \(self.token)", forHTTPHeaderField: "Authorization")
+            
+            URLSession.shared.dataTask(with: authorizedRequest) { data, response, error in
+                if let httpResponse = response as? HTTPURLResponse,
+                   httpResponse.statusCode == 401, attempt < 2 {
+                    print("401 Unauthorized. Refreshing token...")
+                    self.authorize {
+                        self.exchangeToken {
+                            self.performAuthorizedRequest(request, attempt: attempt + 1, completion: completion)
                         }
                     }
                     return
                 }
-            }
-            completion(data, response, error)
-        }.resume()
+                completion(data, response, error)
+            }.resume()
+        }
     }
-
     
-    private func authorize(completion: @escaping () -> Void = {}) {
+    // Authorization
+    private func authorize(completion: @escaping () -> Void) {
         guard let url = URL(string: "\(baseURLString)/auth") else {
             print("Auth URL is not valid")
             completion()
             return
         }
         
-        let codeVerifier = generateCodeVerifier()
+        codeVerifier = generateCodeVerifier()
         let codeChallenge = generateCodeChallenge(from: codeVerifier)
         
-        self.codeVerifier = codeVerifier
-        
-        let credentials = AuthRequest(client_id: client_id, code_challenge: codeChallenge, challenge_method: "S256")
+        let credentials = AuthRequest(client_id: clientID,
+                                      code_challenge: codeChallenge,
+                                      challenge_method: "S256")
         do {
             let jsonData = try JSONEncoder().encode(credentials)
             let request = createRequest(url: url, method: "POST", body: jsonData)
             URLSession.shared.dataTask(with: request) { [weak self] data, _, error in
-                guard let data = data, error == nil else {
-                    print("Failed to post auth: \(error?.localizedDescription ?? "Unknown error")")
+                if let error = error {
+                    print("Failed to post auth: \(error.localizedDescription)")
+                    completion()
+                    return
+                }
+                guard let data = data else {
+                    print("No data received from auth endpoint")
                     completion()
                     return
                 }
@@ -122,27 +143,32 @@ class ApiRequests: ObservableObject {
                 completion()
             }.resume()
         } catch {
-            print("Unable to encode credentials to JSON: \(error)")
+            print("Failed to encode credentials: \(error.localizedDescription)")
             completion()
         }
     }
     
-    private func exchangeToken(completion: @escaping () -> Void = {}) {
+    private func exchangeToken(completion: @escaping () -> Void) {
         guard let url = URL(string: "\(baseURLString)/token") else {
             print("Token URL is not valid")
             completion()
             return
         }
         
-        let tokenRequest = TokenRequest(client_id: client_id,
+        let tokenRequest = TokenRequest(client_id: clientID,
                                         auth_code: authCode,
                                         code_verifier: codeVerifier)
         do {
             let jsonData = try JSONEncoder().encode(tokenRequest)
             let request = createRequest(url: url, method: "POST", body: jsonData)
             URLSession.shared.dataTask(with: request) { [weak self] data, _, error in
-                guard let data = data, error == nil else {
-                    print("Failed to exchange token: \(error?.localizedDescription ?? "Unknown error")")
+                if let error = error {
+                    print("Failed to exchange token: \(error.localizedDescription)")
+                    completion()
+                    return
+                }
+                guard let data = data else {
+                    print("No data received from token endpoint")
                     completion()
                     return
                 }
@@ -150,9 +176,9 @@ class ApiRequests: ObservableObject {
                     let tokenResponse = try JSONDecoder().decode(TokenResponse.self, from: data)
                     DispatchQueue.main.async {
                         self?.token = tokenResponse.access_token
-                        self?.token_type = tokenResponse.token_type
+                        self?.tokenType = tokenResponse.token_type
+                        self?.isAuthorized = true  // Update isAuthorized here on the main thread
                         print("Token exchanged successfully")
-                        
                         if let tokenData = tokenResponse.access_token.data(using: .utf8) {
                             KeychainHelper.shared.save(tokenData,
                                                        service: "com.ppCalculator.auth",
@@ -165,46 +191,45 @@ class ApiRequests: ObservableObject {
                 completion()
             }.resume()
         } catch {
-            print("Unable to encode token request to JSON: \(error)")
+            print("Failed to encode token request: \(error.localizedDescription)")
             completion()
         }
     }
-
-
-    func getMaps(query: String, page: Int, mode: Int, completion: @escaping () -> Void = {}) {
+    
+    // Endpoints
+    func getMaps(query: String, page: Int, mode: Int, completion: @escaping ([Map]) -> Void) {
         let encodedQuery = query.lowercased().addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
         let urlString = "\(baseURLString)/searchdb?query=\(encodedQuery)&page=\(page)&mode=\(mode)"
-        
         guard let url = URL(string: urlString) else {
             print("Invalid URL: \(urlString)")
-            completion()
+            completion([])
             return
         }
         
         let request = createRequest(url: url, method: "GET")
-        
-        performAuthorizedRequest(request) { [weak self] data, _, error in
+        performAuthorizedRequest(request) { data, _, error in
             if let error = error {
                 print("Failed to fetch maps: \(error.localizedDescription)")
-                completion()
+                completion([])
                 return
             }
             guard let data = data else {
                 print("No data returned from maps API")
-                completion()
+                completion([])
                 return
             }
             do {
                 let maps = try JSONDecoder().decode([Map].self, from: data)
                 DispatchQueue.main.async {
-                    self?.data = maps
+                    completion(maps)
                 }
             } catch {
                 print("Failed to decode maps JSON: \(error.localizedDescription)")
+                completion([])
             }
-            completion()
         }
     }
+
     
     func getPP(with ppRequest: PPRequest, completion: @escaping () -> Void = {}) {
         guard let url = URL(string: "\(baseURLString)/calculate") else {
@@ -212,11 +237,9 @@ class ApiRequests: ObservableObject {
             completion()
             return
         }
-        
         do {
             let jsonData = try JSONEncoder().encode(ppRequest)
             let request = createRequest(url: url, method: "POST", body: jsonData)
-            
             performAuthorizedRequest(request) { [weak self] data, _, error in
                 if let error = error {
                     print("Failed to post PP request: \(error.localizedDescription)")
@@ -240,7 +263,7 @@ class ApiRequests: ObservableObject {
                 completion()
             }
         } catch {
-            print("Unable to encode PPRequest to JSON: \(error)")
+            print("Failed to encode PPRequest: \(error.localizedDescription)")
             completion()
         }
     }
@@ -251,11 +274,9 @@ class ApiRequests: ObservableObject {
             completion()
             return
         }
-        
         do {
             let jsonData = try JSONEncoder().encode(feedback)
             let request = createRequest(url: url, method: "POST", body: jsonData)
-            
             performAuthorizedRequest(request) { [weak self] data, _, error in
                 if let error = error {
                     print("Failed to send feedback: \(error.localizedDescription)")
@@ -279,7 +300,7 @@ class ApiRequests: ObservableObject {
                 completion()
             }
         } catch {
-            print("Unable to encode feedback to JSON: \(error)")
+            print("Failed to encode feedback: \(error.localizedDescription)")
             completion()
         }
     }
